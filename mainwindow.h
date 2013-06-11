@@ -19,12 +19,14 @@ public:
 public slots:
     void on_addFolderButton_clicked();
     void on_addLabelButton_clicked();
+    void on_saveButton_clicked();
     
 private:
     Ui::MainWindow *ui;
     QList<Pictures*> pics;
     QGraphicsScene* scene;
     QPointF nextPos;
+    QString db_dir;
 };
 
 #endif // MAINWINDOW_H

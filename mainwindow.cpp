@@ -8,28 +8,50 @@
 #include <QDebug>
 
 #include <iostream>
+#include <QSqlDatabase>
+#include <QSqlQuery>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    QFile conf(".ft.config");
+    if(!conf.open(QIODevice::ReadOnly|QIODevice::Text)){
+        conf.open(QIODevice::ReadWrite|QIODevice::Text);
+        db_dir = QFileDialog::getExistingDirectory(this,"databaseLocation");
+        QTextStream(&conf) << db_dir;
+    }
+    else{
+        db_dir = conf.readLine();
+        db_dir.remove('\n');
+    }
+    Pictures::path(db_dir);
+
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE"); // becomes the new default connection
+    db.setHostName("iqe-face");
+    db.setDatabaseName("faceLabel");
+    db.setUserName("tom");
+    db.setPassword("naruto");
+    QSqlQuery query;
+    query.exec("SELECT NAME, ID FROM STAFF");
+
+
     ui->setupUi(this);
     this->scene = new QGraphicsScene();
     this->ui->graphicsView->setScene(this->scene);
     this->nextPos = QPointF(0,0);
 
-    QFile labels("/Users/tom/database/DB_labels_file.db");
+    QFile labels(this->db_dir + "/DB_labels_file.db");
     labels.open(QIODevice::ReadOnly|QIODevice::Text);
     QTextStream in(&labels);
     QString str;
     in >> str;
     while( !in.atEnd()){
-        qDebug() << str;
         this->ui->comboBox->addItem(str);
         in >> str;
     }
 
-    QFile nameDB("/Users/tom/database/DB_contents.db");
+    QFile nameDB(this->db_dir + "/DB_contents.db");
     nameDB.open(QIODevice::ReadOnly|QIODevice::Text);
     in.setDevice(&nameDB);
     in >> str;
@@ -61,7 +83,7 @@ void MainWindow::on_addFolderButton_clicked(){
                             "Select one or more files to open",
                             "/Users/tom/Pictures/TestCluster/",
                             "Images (*.png *.xpm *.jpg)");
-    QFile nameDB("/Users/tom/database/DB_contents.db");
+    QFile nameDB(this->db_dir + "/DB_contents.db");
     nameDB.open(QIODevice::Append|QIODevice::WriteOnly|QIODevice::Text);
     QTextStream out(&nameDB);
     for(int i = 0 ; i < files.size(); i ++){
@@ -87,7 +109,7 @@ void MainWindow::on_addLabelButton_clicked(){
     if(exists || !ok)
         return;
     this->ui->comboBox->addItem(text);
-    QFile labels("/Users/tom/database/DB_labels_file.db");
+    QFile labels(this->db_dir + "/DB_labels_file.db");
     labels.open(QIODevice::WriteOnly|QIODevice::Append|QIODevice::Text);
     QTextStream out(&labels);
     out << text << '\n';
@@ -95,5 +117,5 @@ void MainWindow::on_addLabelButton_clicked(){
 
 void MainWindow::on_saveButton_clicked(){
     for(int i = 0; i < this->pics.size(); i++)
-        pics[i]->add_labels(ui->comboBox->currentIndex());
+        pics[i]->add_labels(ui->comboBox->currentText());
 }

@@ -12,12 +12,16 @@ class Pictures : public QGraphicsPixmapItem
     int checked;
     QGraphicsItem* state;
 
+    static QString dir_db;
+
 protected:
     void mousePressEvent ( QGraphicsSceneMouseEvent * event );
 
 public:
     Pictures(const QPixmap & pixmap,
              QStringList labs = QStringList(), qint64 line = -1);
+
+    static void path(QString dir_db);
 
 public slots:
     void add_labels(QString labels);

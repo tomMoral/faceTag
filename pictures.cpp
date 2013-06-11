@@ -2,6 +2,8 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QDebug>
 
+QString Pictures::dir_db = " ";
+
 Pictures::Pictures(const QPixmap & pixmap, QStringList labs, qint64 line):
     QGraphicsPixmapItem(pixmap)
 {
@@ -21,12 +23,12 @@ void Pictures::mousePressEvent ( QGraphicsSceneMouseEvent * event ){
     }
     if(event->button() == Qt::LeftButton){
         checked = 1;
-        this->state = new QGraphicsPixmapItem(QPixmap("/Users/tom/prog/faceTag/check.png").scaled(150, 150),this);
+        this->state = new QGraphicsPixmapItem(QPixmap(this->dir_db + "/check.png").scaled(150, 150),this);
         this->state->setZValue(10);
     }
     else{
         checked = 2;
-        this->state = new QGraphicsPixmapItem(QPixmap("/Users/tom/prog/faceTag/cross.gif").scaled(150, 150),this);
+        this->state = new QGraphicsPixmapItem(QPixmap(this->dir_db + "/cross.gif").scaled(150, 150),this);
     }
 }
 
@@ -35,4 +37,8 @@ void Pictures::add_labels(QString label){
         this->labels << label;
         this->values << (this->checked == 1);
     }
+}
+
+void Pictures::path(QString dir_db){
+    Pictures::dir_db = dir_db;
 }
