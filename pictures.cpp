@@ -4,13 +4,13 @@
 
 QString Pictures::dir_db = " ";
 
-Pictures::Pictures(const QPixmap & pixmap, QStringList labs, qint64 line):
+Pictures::Pictures(const QPixmap & pixmap, qint64 id, QStringList labs):
     QGraphicsPixmapItem(pixmap)
 {
     this->checked = 0;
     this->state = NULL;
     this->labels = labs;
-    this->lineSave = line;
+    this->id = id;
 }
 
 void Pictures::mousePressEvent ( QGraphicsSceneMouseEvent * event ){

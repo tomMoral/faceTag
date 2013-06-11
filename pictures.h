@@ -8,7 +8,7 @@ class Pictures : public QGraphicsPixmapItem
 {
     QStringList labels;
     QList<bool> values;
-    qint64 lineSave;
+    qint64 id;
     int checked;
     QGraphicsItem* state;
 
@@ -18,10 +18,12 @@ protected:
     void mousePressEvent ( QGraphicsSceneMouseEvent * event );
 
 public:
-    Pictures(const QPixmap & pixmap,
-             QStringList labs = QStringList(), qint64 line = -1);
+    Pictures(const QPixmap & pixmap, qint64 id,
+             QStringList labs = QStringList());
 
     static void path(QString dir_db);
+    int getState(){return checked;}
+    int getId(){return id;}
 
 public slots:
     void add_labels(QString labels);
