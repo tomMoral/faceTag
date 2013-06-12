@@ -24,6 +24,7 @@ public slots:
     void on_saveButton_clicked();
     void on_comboBox_currentIndexChanged(int lab_id);
     void on_removeButton_clicked();
+    void on_getButton_clicked();
     
 private:
     Ui::MainWindow *ui;
@@ -32,6 +33,7 @@ private:
     QPointF nextPos;
     QString db_dir;
     QSqlDatabase db;
+    QStringList labels;
 };
 
 #endif // MAINWINDOW_H

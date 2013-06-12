@@ -56,10 +56,13 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     ui->comboBox->addItem("Remove");
-    query.exec("SELECT * FROM DB_labels SORT BY id");
+    labels << "None";
+    if(!query.exec("SELECT * FROM DB_labels ORDER BY id"))
+        qDebug() << query.lastError();
     while(query.next()){
         QString str = query.value(1).toString();
         this->ui->comboBox->addItem(str);
+        labels << str;
     }
 
 }
@@ -111,8 +114,8 @@ void MainWindow::on_addLabelButton_clicked(){
     bool ok;
     QString text = QInputDialog::getText(this, tr("Add Label"), tr("Label:"), QLineEdit::Normal,QString(), &ok);
     bool exists = false;
-    for(int i = 0 ; i < this->ui->comboBox->count(); i++)
-        exists = exists || (this->ui->comboBox->itemText(i) == text);
+    for(int i = 0 ; i < labels.size(); i++)
+        exists = exists || (labels[i] == text);
     if(exists || !ok)
         return;
     QSqlQuery query(db);
@@ -123,19 +126,20 @@ void MainWindow::on_addLabelButton_clicked(){
         qDebug() << query.lastError();
 
     this->ui->comboBox->addItem(text);
+    labels << text;
 }
 
 void MainWindow::on_saveButton_clicked(){
     QSqlQuery query(db);
     int lab_id = ui->comboBox->currentIndex();
     if (lab_id == 0) return;
-    for(int i = 0; i < this->pics.size(); i++){
-        int state = pics[i]->getState();
+    for(int i = 0; i < this->pics_displayed.size(); i++){
+        int state = pics_displayed[i]->getState();
         if(state != 0){
-            query.prepare("UPDATE DB_contents SET labels = CASE labels WHEN ' ' THEN :lab ELSE labels ||  ',' || :lab1 END WHERE rowid = :id;");
-            query.bindValue(":id", pics[i]->getId());
+            qDebug() << "Save";
+            query.prepare("UPDATE DB_contents SET labels = CASE labels WHEN '' THEN :lab ELSE labels ||  ',' || :lab1 END WHERE rowid = :id;");
+            query.bindValue(":id", pics_displayed[i]->getId());
             QString lab = QString::number(lab_id) + ':' + ((state==1)?"1":"0");
-            qDebug() << lab << pics[i]->getId();
             query.bindValue(":lab", lab);
             query.bindValue(":lab1", lab);
             if(!query.exec())
@@ -171,7 +175,7 @@ void MainWindow::display(int lab_id){
         pics_displayed.removeFirst();
 
     QSqlQuery query(db);
-    query.prepare("SELECT id FROM DB_contents WHERE labels NOT LIKE :reg ");
+    query.prepare("SELECT id FROM DB_contents WHERE labels NOT LIKE :reg  ORDER BY id");
     QString re = "%";
     re += QString::number(lab_id) +":_%";
     query.bindValue(":reg",  re);
@@ -195,5 +199,32 @@ void MainWindow::display(int lab_id){
 }
 
 void MainWindow::on_comboBox_currentIndexChanged(int lab_id){
+    if(lab_id == 0){
+        ui->saveButton->hide();
+        ui->removeButton->show();
+    }
+    else{
+        ui->saveButton->show();
+        ui->removeButton->hide();
+    }
     display(lab_id);
+}
+
+void MainWindow::on_getButton_clicked(){
+    QString lab = QInputDialog::getItem(this, "Get labeled data", "Choose labels", labels);
+    int lab_id = labels.indexOf(lab);
+
+    QSqlQuery query(db);
+    query.prepare("SELECT id, path, labels FROM DB_contents WHERE labels NOT LIKE :reg ");
+    QString re = "%" + QString::number(lab_id) +":_%";
+    query.bindValue(":reg",  re);
+    if(!query.exec())
+        qDebug() << query.lastError();
+
+    while(query.next()){
+        qint64 id = query.value(0).toInt();
+        QString path = query.value(1).toString();
+        QStringList labs = query.value(2).toString().split(',');
+        qDebug() << labs;
+    }
 }

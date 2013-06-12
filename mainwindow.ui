@@ -62,6 +62,13 @@
       </property>
      </widget>
     </item>
+    <item row="2" column="5">
+     <widget class="QPushButton" name="getButton">
+      <property name="text">
+       <string>Get  data</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -70,7 +77,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>
